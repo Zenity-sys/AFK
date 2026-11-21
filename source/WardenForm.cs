@@ -1198,7 +1198,14 @@ namespace KavrosAfkWarden
             found = list == null ? new List<GameWindow>() : list;
             loading = true;
             windows.Items.Clear();
-            for (int i = 0; i < found.Count; i++) if (WindowLocator.Score(found[i]) >= 100) windows.Items.Add(found[i]);
+            int n = 0;
+            for (int i = 0; i < found.Count; i++)
+            {
+                if (WindowLocator.Score(found[i]) < 100) continue;
+                found[i].Label = WindowLocator.ClientLabel(found[i], n);
+                n++;
+                windows.Items.Add(found[i]);
+            }
             GameWindow choice = WindowLocator.Choose(found, selected, clientTitle);
             if (choice != null)
             {

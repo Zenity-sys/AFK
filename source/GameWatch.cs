@@ -14,8 +14,10 @@ namespace KavrosAfkWarden
         internal string Title = "";
         internal string ProcessName = "";
         internal string ClassName = "";
+        internal uint ProcessId;
         internal Rectangle Client;
-        public override string ToString() { return Title; }
+        internal string Label;
+        public override string ToString() { return string.IsNullOrEmpty(Label) ? Title : Label; }
     }
 
     internal static class WindowLocator
@@ -47,6 +49,7 @@ namespace KavrosAfkWarden
                 game.Title = title.ToString();
                 game.ProcessName = process;
                 game.ClassName = className.ToString();
+                game.ProcessId = pid;
                 game.Client = NativeMethods.ClientBounds(window);
                 list.Add(game);
                 return true;
@@ -83,9 +86,9 @@ namespace KavrosAfkWarden
 
         internal static string ClientLabel(GameWindow window, int index)
         {
-            string title = window == null ? "" : window.Title ?? "";
-            if (title.Length > 36) title = title.Substring(0, 36);
-            return "Client " + (index + 1).ToString() + ": " + title;
+            uint pid = window == null ? 0 : window.ProcessId;
+            string title = window == null || window.Title == null ? "" : window.Title;
+            return ClientIdentity.Label(pid, index, title);
         }
 
         internal static bool IsForeground(IntPtr game)
