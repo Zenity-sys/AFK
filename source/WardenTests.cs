@@ -1930,21 +1930,30 @@ namespace KavrosAfkWarden
             Check(prayer.Value == 1200 && prayer.Max == 990, "boosted prayer uses the same ceiling and keeps moving, got " + prayer.Value);
             prayer.Push(4001, 990, t.AddSeconds(3));
             Check(prayer.Value == 1200, "prayer above 4000 is rejected");
-            int panelW, hintY, hintH, buttonY, panelH;
-            PanelHint.Foot(18, 360, out panelW, out hintY, out hintH, out buttonY, out panelH);
-            Check(hintH >= 18 * 2 && buttonY >= hintY + hintH + 16 && panelH >= buttonY + 28, "the tip has its own lines and a gap above the buttons at 100%");
-            int wideW, wideY, wideH, wideButton, widePanel;
-            PanelHint.Foot(36, 720, out wideW, out wideY, out wideH, out wideButton, out widePanel);
-            Check(wideH >= 36 * 2 && wideButton >= wideY + wideH + 16 && wideW >= 752 && widePanel >= wideButton + 28, "the tip grows at 200% and still sits above the buttons");
+            Check(PanelHint.ShowTip(false) && !PanelHint.ShowTip(true), "the tip hides once RuneMetrics XP is found");
             int[] tipScale = new int[] { 18, 27, 36 };
             string[] tipName = new string[] { "100%", "150%", "200%" };
             for (int scale = 0; scale < tipScale.Length; scale++)
             {
-                int tipW, tipY, tipH, tipButton, tipPanel;
-                PanelHint.Foot(tipScale[scale], 360 * tipScale[scale] / 18, out tipW, out tipY, out tipH, out tipButton, out tipPanel);
+                int tipW, tipY, tipH, tipButton, notesY, notesH, tipPanel;
+                int lineW = 360 * tipScale[scale] / 18;
+                PanelHint.Foot(tipScale[scale], lineW, true, false, out tipW, out tipY, out tipH, out tipButton, out notesY, out notesH, out tipPanel);
                 int afkBottom = PanelHint.AfkBottom(tipScale[scale]);
-                Check(PanelHint.Always && tipY >= afkBottom && tipH >= tipScale[scale] * 2 && tipButton >= tipY + tipH + 8 && tipPanel >= tipButton + 28,
-                    "the dimmed tip sits in the gap above the buttons at " + tipName[scale] + ", afk " + afkBottom.ToString() + " hint " + tipY.ToString() + " button " + tipButton.ToString());
+                Check(tipY >= afkBottom && tipH >= tipScale[scale] * 2 && tipButton >= tipY + tipH + 8 && tipPanel >= tipButton + 28 + 12 && notesH == 0,
+                    "the tip sits in the gap above the buttons at " + tipName[scale] + ", afk " + afkBottom.ToString() + " hint " + tipY.ToString() + " button " + tipButton.ToString());
+                if (tipScale[scale] == 36) Check(tipW >= 752, "the tip grows the panel at 200%");
+                int hiddenW, hiddenY, hiddenH, hiddenButton, hiddenNotesY, hiddenNotesH, hiddenPanel;
+                PanelHint.Foot(tipScale[scale], lineW, false, false, out hiddenW, out hiddenY, out hiddenH, out hiddenButton, out hiddenNotesY, out hiddenNotesH, out hiddenPanel);
+                Check(hiddenH == 0 && hiddenButton >= afkBottom && hiddenButton < tipButton && hiddenPanel < tipPanel && hiddenPanel >= hiddenButton + 28 + 12,
+                    "hiding the tip closes the gap above the buttons at " + tipName[scale] + ", button " + hiddenButton.ToString() + " panel " + hiddenPanel.ToString());
+                int openW, openY, openH, openButton, openNotesY, openNotesH, openPanel;
+                PanelHint.Foot(tipScale[scale], lineW, true, true, out openW, out openY, out openH, out openButton, out openNotesY, out openNotesH, out openPanel);
+                Check(openButton == tipButton && openNotesH == PanelHint.NotesBody && openNotesY >= openButton + 28 && openPanel >= openNotesY + openNotesH + PanelHint.EdgePad,
+                    "What's new fits inside the panel under the buttons at " + tipName[scale] + ", notes " + openNotesY.ToString() + " panel " + openPanel.ToString());
+                int bothW, bothY, bothH, bothButton, bothNotesY, bothNotesH, bothPanel;
+                PanelHint.Foot(tipScale[scale], lineW, false, true, out bothW, out bothY, out bothH, out bothButton, out bothNotesY, out bothNotesH, out bothPanel);
+                Check(bothButton == hiddenButton && bothH == 0 && bothNotesY >= bothButton + 28 && bothNotesY < openNotesY && bothPanel >= bothNotesY + bothNotesH + PanelHint.EdgePad && bothPanel < openPanel,
+                    "What's new still fits after the tip is hidden at " + tipName[scale] + ", notes " + bothNotesY.ToString() + " panel " + bothPanel.ToString());
             }
             Check(PanelHint.Line1.IndexOf("precise values") >= 0 && PanelHint.Line1.IndexOf("RuneMetrics") >= 0 && PanelHint.Line2.IndexOf("minimized") >= 0, "the tip says to keep RuneMetrics open, and not minimized");
             Check(!AlertSurface.ShowsWindow, "low alerts do not open a window or a toast");
@@ -2190,7 +2199,7 @@ namespace KavrosAfkWarden
                 Check(next >= at, "notes are newest first, missing " + version);
                 at = next + 1;
             }
-            Check(ReleaseNotes.VersionAt(0) == "v0.2.40" && text.IndexOf("v0.2.29") > text.IndexOf("v0.2.40"), "notes run from this release back to the heading fix");
+            Check(ReleaseNotes.VersionAt(0) == "v0.2.41" && text.IndexOf("v0.2.29") > text.IndexOf("v0.2.41"), "notes run from this release back to the heading fix");
             Check(text.IndexOf("left-click") >= 0, "the notes mention the left click");
             Check(text.IndexOf("What's new") >= 0 && text.IndexOf("points per hour") >= 0, "this release mentions the notes and the hourly rate");
             Check(text.IndexOf("five minutes") >= 0 && text.IndexOf("prayer bars") >= 0, "the notes mention potion cooldown and the bars");
@@ -2989,7 +2998,7 @@ namespace KavrosAfkWarden
 
         private static void Manifest(string root)
         {
-            Check(AppInfo.Version == "0.2.40" && AppInfo.Name == "AFK Warden" && AppInfo.Author == "Zenity", "module identity");
+            Check(AppInfo.Version == "0.2.41" && AppInfo.Name == "AFK Warden" && AppInfo.Author == "Zenity", "module identity");
             if (string.IsNullOrEmpty(root)) return;
             string jsonPath = Path.Combine(root, "companion.module.json");
             string manifestPath = Path.Combine(root, "source", "app.manifest");
@@ -3000,10 +3009,10 @@ namespace KavrosAfkWarden
             }
             string json = File.ReadAllText(jsonPath);
             string manifest = File.ReadAllText(manifestPath);
-            Check(json.IndexOf("\"version\": \"0.2.40\"") >= 0, "public module manifest version");
+            Check(json.IndexOf("\"version\": \"0.2.41\"") >= 0, "public module manifest version");
             Check(json.IndexOf("\"name\": \"AFK Warden\"") >= 0 && json.IndexOf("\"author\": \"Zenity\"") >= 0, "public module manifest name and author");
             Check(json.IndexOf("\"id\": \"afk-warden\"") >= 0, "public module id");
-            Check(manifest.IndexOf("version=\"0.2.40.0\"") >= 0 && manifest.IndexOf("name=\"KavrosAfkWarden\"") >= 0, "assembly manifest version");
+            Check(manifest.IndexOf("version=\"0.2.41.0\"") >= 0 && manifest.IndexOf("name=\"KavrosAfkWarden\"") >= 0, "assembly manifest version");
         }
     }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.41
+
+- What's new stays inside the panel, with room under the box. The RuneMetrics reminder hides once your XP total is found.
+
 ## 0.2.40
 
 - Launch with --no-tray to run without a system tray icon.

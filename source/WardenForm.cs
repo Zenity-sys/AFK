@@ -218,7 +218,6 @@ namespace KavrosAfkWarden
         private Panel notesHost;
         private TextBox notesBox;
         private bool notesWanted;
-        private const int NotesHeight = 168;
 
         internal WatchPanel()
         {
@@ -304,10 +303,18 @@ namespace KavrosAfkWarden
             sacrificeResetWanted = show;
             sacrificeReset.Visible = show && !collapsed;
         }
-        internal void SetMetricsHint(bool show)
+        private bool metricsSeen;
+        internal void NoteMetrics(bool found)
         {
-            hintWanted = PanelHint.Always || show;
-            metricsHint.Visible = hintWanted && !collapsed;
+            if (found) metricsSeen = true;
+            bool show = PanelHint.ShowTip(metricsSeen);
+            if (show == hintWanted)
+            {
+                metricsHint.Visible = show && !collapsed;
+                return;
+            }
+            hintWanted = show;
+            LayoutFoot();
         }
         private bool gameFound;
         private string gameName = "";
@@ -331,11 +338,10 @@ namespace KavrosAfkWarden
             collapsed = value;
             collapse.Text = collapsed ? "+" : "-";
             note.Visible = !collapsed;
-            metricsHint.Visible = !collapsed && hintWanted;
             Idle.Visible = Hp.Visible = Prayer.Visible = Potion.Visible = Sacrifice.Visible = Afk.Visible = !collapsed;
             sacrificeReset.Visible = !collapsed && sacrificeResetWanted;
             pause.Visible = exit.Visible = !collapsed;
-            ApplyNotes();
+            LayoutFoot();
         }
 
         internal void ShowNotes(string text)
@@ -343,13 +349,13 @@ namespace KavrosAfkWarden
             EnsureNotes();
             notesBox.Text = text ?? "";
             notesWanted = true;
-            ApplyNotes();
+            LayoutFoot();
         }
 
         internal void HideNotes()
         {
             notesWanted = false;
-            ApplyNotes();
+            LayoutFoot();
         }
 
         private void EnsureNotes()
@@ -398,19 +404,6 @@ namespace KavrosAfkWarden
             Controls.Add(notesHost);
         }
 
-        private void ApplyNotes()
-        {
-            bool show = notesWanted && !collapsed && notesHost != null;
-            if (notesHost != null) notesHost.Visible = show;
-            int width = ClientSize.Width < 80 ? 400 : ClientSize.Width;
-            int height = collapsed ? 32 : openHeight + (show ? NotesHeight : 0);
-            if (ClientSize.Width != width || ClientSize.Height != height)
-                ClientSize = new Size(width, height);
-            if (!show || notesHost == null) return;
-            notesHost.SetBounds(8, openHeight, Math.Max(40, width - 16), NotesHeight);
-            notesHost.BringToFront();
-        }
-
         private int openHeight = 360;
         private bool layingOut;
 
@@ -425,8 +418,9 @@ namespace KavrosAfkWarden
                 Size second = TextRenderer.MeasureText(PanelHint.Line2, font);
                 int lineH = Math.Max(first.Height, second.Height);
                 int lineW = Math.Max(first.Width, second.Width);
-                int panelW, hintY, hintH, buttonY, panelH;
-                PanelHint.Foot(lineH, lineW, out panelW, out hintY, out hintH, out buttonY, out panelH);
+                bool notesOpen = notesWanted && !collapsed;
+                int panelW, hintY, hintH, buttonY, notesY, notesH, panelH;
+                PanelHint.Foot(lineH, lineW, hintWanted, notesOpen, out panelW, out hintY, out hintH, out buttonY, out notesY, out notesH, out panelH);
                 Font rowFont = KavrosTheme.Ui(9F, false);
                 int rowLine = Math.Max(16, TextRenderer.MeasureText("Ag", rowFont).Height);
                 int rowH = Math.Max(28, rowLine + 8);
@@ -437,10 +431,6 @@ namespace KavrosAfkWarden
                 int potionY = prayerY + rowH + 4;
                 int sacY = potionY + rowH + 4;
                 int afkY = sacY + sacH + 4;
-                int stackHint = afkY + rowH + 8;
-                if (stackHint > hintY) hintY = stackHint;
-                buttonY = hintY + hintH + 16;
-                panelH = buttonY + 28 + 16;
                 int resetW = Math.Max(64, TextRenderer.MeasureText("Reset", rowFont).Width + 18);
                 string sample = "1,470 this session · 6 sacrifices · 12,345/h";
                 int sampleW = TextRenderer.MeasureText(sample, rowFont).Width;
@@ -455,14 +445,20 @@ namespace KavrosAfkWarden
                 Sacrifice.SetBounds(12, sacY, Math.Max(40, textW - resetW - 8), sacH);
                 sacrificeReset.SetBounds(12 + textW - resetW, sacY + Math.Max(0, (sacH - rowH) / 2), resetW, rowH);
                 Afk.SetBounds(12, afkY, textW, rowH);
-                metricsHint.SetBounds(12, hintY, textW, hintH);
+                metricsHint.Visible = hintWanted && !collapsed;
+                metricsHint.SetBounds(12, hintY, textW, Math.Max(1, hintH));
                 int buttonW = Math.Max(120, (textW - 8) / 2);
                 pause.SetBounds(12, buttonY, buttonW, 28);
                 exit.SetBounds(12 + buttonW + 8, buttonY, buttonW, 28);
+                if (notesHost != null)
+                {
+                    notesHost.Visible = notesOpen;
+                    if (notesOpen) notesHost.SetBounds(8, notesY, Math.Max(40, panelW - 16), notesH);
+                    if (notesOpen) notesHost.BringToFront();
+                }
                 openHeight = panelH;
-                ClientSize = new Size(panelW, collapsed ? 32 : openHeight);
+                ClientSize = new Size(panelW, collapsed ? 32 : panelH);
                 LayoutHeader();
-                ApplyNotes();
             }
             finally { layingOut = false; }
         }
@@ -1888,7 +1884,7 @@ namespace KavrosAfkWarden
             panel.Potion.Value = closed ? "Client closed" : roster.Length > 0 && !settings.Paused
                 ? roster
                 : (minimized ? "Minimized" : !pixels ? "No view" : waiting);
-            panel.SetMetricsHint(true);
+            panel.NoteMetrics(lastHud != null && lastHud.MetricsFound);
             int left = Math.Max(0, (int)engine.AfkRemaining.TotalSeconds);
             panel.Afk.Pill = engine.AfkLatched ? "AFK soon" : "AFK timer";
             panel.Afk.Tone = engine.AfkLatched ? PillTone.Bad : PillTone.Ok;

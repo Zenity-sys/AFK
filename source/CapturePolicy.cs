@@ -273,14 +273,19 @@ namespace KavrosAfkWarden
         }
     }
 
-    // The RuneMetrics tip sits on its own lines, above the buttons, and grows
-    // with the measured text so 150% and 200% do not clip it.
+    // The RuneMetrics tip sits on its own lines above the buttons until XP is
+    // found. What's new, when open, stays inside the panel with padding below it.
     public static class PanelHint
     {
         public const string Line1 = "Keep RuneMetrics open with precise values.";
         public const string Line2 = "Background is fine; not minimized.";
-        // The tip stays on the panel, dimmed, whether or not RuneMetrics is open.
-        public const bool Always = true;
+        public const int NotesBody = 168;
+        public const int EdgePad = 16;
+
+        public static bool ShowTip(bool metricsXpFound)
+        {
+            return !metricsXpFound;
+        }
 
         public static int AfkBottom(int lineHeight)
         {
@@ -292,22 +297,37 @@ namespace KavrosAfkWarden
             return afkY + rowH;
         }
 
-        public static void Foot(int lineHeight, int lineWidth, out int panelW, out int hintY, out int hintH, out int buttonY, out int panelH)
+        public static void Foot(int lineHeight, int lineWidth, bool showTip, bool showNotes, out int panelW, out int hintY, out int hintH, out int buttonY, out int notesY, out int notesH, out int panelH)
         {
             if (lineHeight < 16) lineHeight = 16;
             if (lineWidth < 280) lineWidth = 280;
             panelW = Math.Max(400, lineWidth + 32);
-            // Idle, hitpoints, prayer, potions, then the sacrifice counter and
-            // the AFK row. The tip starts under that stack so it does not cover
-            // the counter at 100%, 150% or 200%.
-            int rowH = Math.Max(28, lineHeight + 8);
-            int sacH = lineHeight * 2 + 10;
-            int y = 66 + (rowH + 4) * 4;
-            y += sacH + 4 + rowH + 8;
-            hintY = y;
-            hintH = lineHeight * 2 + 12;
-            buttonY = hintY + hintH + 16;
-            panelH = buttonY + 28 + 16;
+            int afkBottom = AfkBottom(lineHeight);
+            if (showTip)
+            {
+                hintY = afkBottom + 8;
+                hintH = lineHeight * 2 + 12;
+                buttonY = hintY + hintH + 16;
+            }
+            else
+            {
+                hintY = afkBottom;
+                hintH = 0;
+                buttonY = afkBottom + 8;
+            }
+            int buttonBottom = buttonY + 28;
+            if (showNotes)
+            {
+                notesY = buttonBottom + 12;
+                notesH = NotesBody;
+                panelH = notesY + notesH + EdgePad;
+            }
+            else
+            {
+                notesY = buttonBottom;
+                notesH = 0;
+                panelH = buttonBottom + EdgePad;
+            }
         }
     }
 }
