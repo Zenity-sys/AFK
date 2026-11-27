@@ -1,10 +1,10 @@
 # AFK Warden
 
-AFK Warden is a Companion module for Kavros. It watches the game window and warns you when you have gone idle, when hitpoints or prayer run low, and shortly before the inactivity timer would send you to AFK. Version 0.2.39 is a Windows .NET Framework 4.8 application.
+AFK Warden is a Companion module for Kavros. It watches the game window and warns you when you have gone idle, when hitpoints or prayer run low, and shortly before the inactivity timer would send you to AFK. Version 0.2.40 is a Windows .NET Framework 4.8 application.
 
 Keep the RuneMetrics window open and turn on precise values, so the total is a full number. The game client can sit in the background, but it must not be minimized. Keep the chatbox visible, with game messages on, so the elder overload and aggression lines are read from chat.
 
-The public module record is [`companion.module.json`](companion.module.json). The Companion panel can read it from this repository's `main` branch. While the program is running it also writes `%LocalAppData%\Kavros\Companion\modules\afk-warden.json` with `Running · v0.2.39`.
+The public module record is [`companion.module.json`](companion.module.json). The Companion panel can read it from this repository's `main` branch. While the program is running it also writes `%LocalAppData%\Kavros\Companion\modules\afk-warden.json` with `Running · v0.2.40`.
 
 The window uses the shared Companion theme: `source/KavrosTheme.cs`, `OpaqueButton`, `KavrosCheckBox`, the Cinzel and Outfit fonts, the crest, the navy panels, the gold primary button, the dark secondary buttons, and the status pills.
 
@@ -12,7 +12,7 @@ The window uses the shared Companion theme: `source/KavrosTheme.cs`, `OpaqueButt
 
 Requires Windows 10 or 11 and .NET Framework 4.8.
 
-A release tag `v0.2.39` (the first three parts of `source/app.manifest`) builds with `source/build.ps1`, packs with Velopack 1.2.161, and publishes:
+A release tag `v0.2.40` (the first three parts of `source/app.manifest`) builds with `source/build.ps1`, packs with Velopack 1.2.161, and publishes:
 
 - `KavrosAfkWarden-win-Setup.exe`
 - `KavrosAfkWarden-win-Portable.zip`
@@ -85,7 +85,7 @@ KavrosAfkWarden.exe --self-test results.txt
 
 The headless test checks the alert gates, the per-alert sound and notification switches, the settings file, idle versus the AFK clock, minimized and covered capture decisions, digit and bar reading, and that `companion.module.json` matches `source/app.manifest`. It does not open a window and it does not capture the desktop.
 
-Tag `v0.2.39` to publish a release. The tag must match the first three parts of the version in `source/app.manifest`. While **Check for updates at startup** is on, an installed copy also checks GitHub Releases every three hours. A folder copy that was not installed with Setup cannot update itself.
+Tag `v0.2.40` to publish a release. The tag must match the first three parts of the version in `source/app.manifest`. While **Check for updates at startup** is on, an installed copy also checks GitHub Releases every three hours. A folder copy that was not installed with Setup cannot update itself.
 
 ## What was not verified
 

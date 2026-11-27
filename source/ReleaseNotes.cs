@@ -13,6 +13,7 @@ namespace KavrosAfkWarden
     {
         private static readonly ReleaseNote[] notes = new ReleaseNote[]
         {
+            Note("v0.2.40", "Launch with --no-tray to run without a system tray icon."),
             Note("v0.2.39", "A new sacrifice still counts after the chat scrolls and the line sits where an older one was. The total has to match the last counted total plus the gain."),
             Note("v0.2.38", "The AFK timer resets only when you left-click the game. Moving the camera, or using another mouse button, does not reset it. The debug log keeps a much longer history and writes down each sacrifice line."),
             Note("v0.2.37", "What's new opens on the panel once after an update, and you can open it again from Settings. The sacrifice row shows points per hour since the last Reset."),

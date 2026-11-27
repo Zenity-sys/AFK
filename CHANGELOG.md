@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.40
+
+- Launch with --no-tray to run without a system tray icon.
+
 ## 0.2.39
 
 - A new sacrifice still counts when the chat scrolls and the line sits where an older sacrifice was. The total has to match the last counted total plus the gain.

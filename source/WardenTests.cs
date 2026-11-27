@@ -2190,7 +2190,7 @@ namespace KavrosAfkWarden
                 Check(next >= at, "notes are newest first, missing " + version);
                 at = next + 1;
             }
-            Check(ReleaseNotes.VersionAt(0) == "v0.2.39" && text.IndexOf("v0.2.29") > text.IndexOf("v0.2.39"), "notes run from this release back to the heading fix");
+            Check(ReleaseNotes.VersionAt(0) == "v0.2.40" && text.IndexOf("v0.2.29") > text.IndexOf("v0.2.40"), "notes run from this release back to the heading fix");
             Check(text.IndexOf("left-click") >= 0, "the notes mention the left click");
             Check(text.IndexOf("What's new") >= 0 && text.IndexOf("points per hour") >= 0, "this release mentions the notes and the hourly rate");
             Check(text.IndexOf("five minutes") >= 0 && text.IndexOf("prayer bars") >= 0, "the notes mention potion cooldown and the bars");
@@ -2989,7 +2989,7 @@ namespace KavrosAfkWarden
 
         private static void Manifest(string root)
         {
-            Check(AppInfo.Version == "0.2.39" && AppInfo.Name == "AFK Warden" && AppInfo.Author == "Zenity", "module identity");
+            Check(AppInfo.Version == "0.2.40" && AppInfo.Name == "AFK Warden" && AppInfo.Author == "Zenity", "module identity");
             if (string.IsNullOrEmpty(root)) return;
             string jsonPath = Path.Combine(root, "companion.module.json");
             string manifestPath = Path.Combine(root, "source", "app.manifest");
@@ -3000,10 +3000,10 @@ namespace KavrosAfkWarden
             }
             string json = File.ReadAllText(jsonPath);
             string manifest = File.ReadAllText(manifestPath);
-            Check(json.IndexOf("\"version\": \"0.2.39\"") >= 0, "public module manifest version");
+            Check(json.IndexOf("\"version\": \"0.2.40\"") >= 0, "public module manifest version");
             Check(json.IndexOf("\"name\": \"AFK Warden\"") >= 0 && json.IndexOf("\"author\": \"Zenity\"") >= 0, "public module manifest name and author");
             Check(json.IndexOf("\"id\": \"afk-warden\"") >= 0, "public module id");
-            Check(manifest.IndexOf("version=\"0.2.39.0\"") >= 0 && manifest.IndexOf("name=\"KavrosAfkWarden\"") >= 0, "assembly manifest version");
+            Check(manifest.IndexOf("version=\"0.2.40.0\"") >= 0 && manifest.IndexOf("name=\"KavrosAfkWarden\"") >= 0, "assembly manifest version");
         }
     }
 }

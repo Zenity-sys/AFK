@@ -2,7 +2,7 @@
   "id": "afk-warden",
   "name": "AFK Warden",
   "author": "Zenity",
-  "version": "0.2.39",
+  "version": "0.2.40",
   "summary": "Warns when you go idle, when hitpoints, prayer, or a potion timer run low, and shortly before an inactivity teleport.",
   "repository": "https://github.com/Zenity-sys/AFK",
   "executable": "KavrosAfkWarden.exe",
