@@ -91,6 +91,7 @@ namespace KavrosAfkWarden
     {
         public static long Hwnd;
         public static int Pid;
+        public static bool NoTray;
 
         public static void ReadArgs(string[] args)
         {
@@ -98,6 +99,7 @@ namespace KavrosAfkWarden
             for (int i = 0; i < args.Length; i++)
             {
                 string arg = args[i] ?? "";
+                if (Same(arg, "--no-tray")) { NoTray = true; continue; }
                 string name;
                 string value;
                 if (!Split(arg, out name, out value))

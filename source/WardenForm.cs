@@ -664,16 +664,19 @@ namespace KavrosAfkWarden
                 panel.Location = new Point(work.Right - panel.Width - 24, work.Top + 72);
             }
             panel.TopMost = false;
-            ContextMenuStrip menu = new ContextMenuStrip();
-            menu.Items.Add("Open panel", null, delegate { ShowPanel(); });
-            menu.Items.Add("Settings", null, delegate { ShowSettings(); });
-            menu.Items.Add("Exit", null, delegate { Exit(); });
-            tray = new NotifyIcon();
-            tray.Icon = Icon;
-            tray.Text = "AFK Warden " + AppInfo.DisplayVersion;
-            tray.Visible = true;
-            tray.ContextMenuStrip = menu;
-            tray.DoubleClick += delegate { ShowPanel(); };
+            if (!ClientLaunch.NoTray)
+            {
+                ContextMenuStrip menu = new ContextMenuStrip();
+                menu.Items.Add("Open panel", null, delegate { ShowPanel(); });
+                menu.Items.Add("Settings", null, delegate { ShowSettings(); });
+                menu.Items.Add("Exit", null, delegate { Exit(); });
+                tray = new NotifyIcon();
+                tray.Icon = Icon;
+                tray.Text = "AFK Warden " + AppInfo.DisplayVersion;
+                tray.Visible = true;
+                tray.ContextMenuStrip = menu;
+                tray.DoubleClick += delegate { ShowPanel(); };
+            }
             HandleCreated += delegate { KavrosTheme.ApplyWindowChrome(Handle); };
             Shown += delegate
             {
@@ -701,7 +704,7 @@ namespace KavrosAfkWarden
             {
                 if (!closing && e.CloseReason == CloseReason.UserClosing) { e.Cancel = true; Hide(); ShowPanel(); }
             };
-            FormClosed += delegate { closing = true; try { timer.Stop(); } catch (Exception) { } try { Save(); } catch (Exception) { } try { CompanionStatus.Write("stopped", settings.Paused); } catch (Exception) { } try { grab.Stop(); } catch (Exception) { } try { tray.Visible = false; tray.Dispose(); } catch (Exception) { } try { panel.Dispose(); } catch (Exception) { } };
+            FormClosed += delegate { closing = true; try { timer.Stop(); } catch (Exception) { } try { Save(); } catch (Exception) { } try { CompanionStatus.Write("stopped", settings.Paused); } catch (Exception) { } try { grab.Stop(); } catch (Exception) { } try { if (tray != null) { tray.Visible = false; tray.Dispose(); } } catch (Exception) { } try { panel.Dispose(); } catch (Exception) { } };
             timer.Interval = CapturePlan.SampleMilliseconds;
             timer.Tick += delegate { Tick(); };
         }
@@ -1658,7 +1661,7 @@ namespace KavrosAfkWarden
             try { CompanionStatus.Write("stopped", settings.Paused); } catch (Exception) { }
             try { timer.Stop(); timer.Dispose(); } catch (Exception) { }
             try { grab.Stop(); } catch (Exception) { }
-            try { tray.Visible = false; } catch (Exception) { }
+            try { if (tray != null) tray.Visible = false; } catch (Exception) { }
             try { Application.Exit(); } catch (Exception) { }
             Environment.Exit(0);
         }

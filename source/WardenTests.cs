@@ -1669,6 +1669,18 @@ namespace KavrosAfkWarden
             ClientLaunch.ReadArgs(new string[] { "--hwnd", "4567", "--pid", "89" });
             Check(ClientLaunch.Hwnd == 4567 && ClientLaunch.Pid == 89, "a companion launch can pass the client hwnd and pid");
             ClientLaunch.Clear();
+            ClientLaunch.NoTray = false;
+            ClientLaunch.ReadArgs(new string[] { "--hwnd", "4567", "--pid", "89" });
+            Check(!ClientLaunch.NoTray, "the tray icon stays unless --no-tray is passed");
+            ClientLaunch.ReadArgs(new string[] { "--unknown", "--hwnd=4567", "--no-tray" });
+            Check(ClientLaunch.NoTray && ClientLaunch.Hwnd == 4567, "--no-tray is read next to the client hwnd");
+            ClientLaunch.NoTray = false;
+            ClientLaunch.ReadArgs(new string[] { "--hwnd", "4567", "--no-tray", "--pid", "89" });
+            Check(ClientLaunch.NoTray && ClientLaunch.Hwnd == 4567 && ClientLaunch.Pid == 89, "--no-tray does not disturb the client hwnd and pid");
+            ClientLaunch.NoTray = false;
+            ClientLaunch.ReadArgs(new string[] { "--no-trays", "no-tray", "--notray" });
+            Check(!ClientLaunch.NoTray, "only the exact --no-tray switch hides the tray icon");
+            ClientLaunch.Clear();
             Check(ClientBind.Choose(clients, 200, 0, 0) == 200, "a character label does not move the bound client");
             Dictionary<int, string> named = ClientRoster.Parse("[{\"pid\": 22, \"name\": \"Zezima\"}, {\"pid\": 33, \"name\": \"Tim \\\"Two\\\"\"}]");
             string zezima;
